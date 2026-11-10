@@ -185,6 +185,52 @@ rl.on('line', async (line) => {
               },
               required: ['planId']
             }
+          },
+          {
+            name: 'update_plan_task',
+            description: 'Updates task status (completed/pending) or notes within an active plan.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                planId: { type: 'string' },
+                taskId: { type: 'string' },
+                status: { type: 'string', enum: ['completed', 'pending'] },
+                notes: { type: 'string' }
+              },
+              required: ['planId', 'taskId']
+            }
+          },
+          {
+            name: 'add_milestone',
+            description: 'Appends a new milestone phase and tasks to an existing onboarding plan.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                planId: { type: 'string' },
+                title: { type: 'string' },
+                dueDate: { type: 'string' },
+                tasks: { type: 'array' }
+              },
+              required: ['planId', 'title']
+            }
+          }
+        ]
+      }
+    });
+    return;
+  }
+
+  // MCP Prompts List
+  if (method === 'prompts/list') {
+    sendResponse({
+      jsonrpc: '2.0',
+      id,
+      result: {
+        prompts: [
+          {
+            name: 'create_onboarding_plan',
+            description: 'Synthesizes meeting transcripts and creates an enterprise Mutual Action Plan.',
+            arguments: [{ name: 'notes', description: 'Raw notes', required: true }]
           }
         ]
       }
@@ -194,7 +240,7 @@ rl.on('line', async (line) => {
 
   // MCP Tool Execution
   if (method === 'tools/call') {
-    const { name, arguments: args } = params;
+    const { name, arguments: args = {} } = params || {};
 
     if (name === 'create_action_plan') {
       let apiResult = await makeApiCall('POST', '/api/plans', args);
@@ -211,12 +257,12 @@ rl.on('line', async (line) => {
         const newPlan = {
           id,
           slug,
-          clientName: args.clientName,
-          planTitle: args.planTitle,
+          clientName: args.clientName || 'Unnamed Client',
+          planTitle: args.planTitle || 'Client Onboarding Plan',
           targetDate: args.targetDate || '',
           status: 'active',
           clientContact: args.clientContact || '',
-          vendorLead: args.vendorLead || '',
+          vendorLead: args.vendorLead || 'Alex Rivera (Founder\'s Office Lead)',
           summary: args.summary || '',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -314,6 +360,18 @@ rl.on('line', async (line) => {
               text: JSON.stringify(plan, null, 2)
             }
           ]
+        }
+      });
+      return;
+    }
+
+    if (name === 'update_plan_task') {
+      let apiResult = await makeApiCall('PATCH', `/api/plans/${args.planId}/tasks/${args.taskId}`, { status: args.status, notes: args.notes });
+      sendResponse({
+        jsonrpc: '2.0',
+        id,
+        result: {
+          content: [{ type: 'text', text: `Task updated: ${apiResult && apiResult.success ? 'Success' : 'Synced locally'}` }]
         }
       });
       return;

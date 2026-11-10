@@ -1,42 +1,42 @@
 {
   "plans": [
     {
-      "id": "plan_demo_fintech",
-      "slug": "fintech-corp-onboarding",
+      "id": "plan_2ee3fc07",
+      "slug": "fintech-corp-182",
       "clientName": "FinTech Corp",
       "planTitle": "Enterprise ERP Integration & Card Rollout",
       "targetDate": "2026-12-15",
       "status": "active",
-      "clientContact": "Sarah Jenkins (Head of Finance)",
-      "vendorLead": "Alex Rivera (Founding Product Lead)",
-      "summary": "Onboarding blueprint to connect NetSuite, establish department spending limits, and issue 150 virtual cards.",
-      "createdAt": "2026-11-10T05:51:31.191Z",
-      "updatedAt": "2026-11-10T05:51:31.191Z",
+      "clientContact": "",
+      "vendorLead": "Alex Rivera (Founder's Office Lead)",
+      "summary": "Simulated Claude cognitive synthesis for FinTech Corp.",
+      "createdAt": "2026-11-10T08:05:58.123Z",
+      "updatedAt": "2026-11-10T08:05:58.123Z",
       "milestones": [
         {
           "id": "m_1",
           "title": "Phase 1: Compliance & Account Verification",
-          "dueDate": "2026-11-18",
+          "dueDate": "2026-11-20",
           "tasks": [
             {
               "id": "t_1_1",
               "title": "Submit KYB documents & authorized signatory IDs",
               "owner": "client",
-              "status": "completed",
+              "status": "pending",
               "notes": "Verified by compliance"
             },
             {
               "id": "t_1_2",
               "title": "Configure Okta SAML 2.0 Single Sign-On",
               "owner": "client",
-              "status": "completed",
-              "notes": "SSO live"
+              "status": "pending",
+              "notes": "IT authorization required"
             },
             {
               "id": "t_1_3",
               "title": "Provision Volopay production tenant & roles",
               "owner": "vendor",
-              "status": "completed",
+              "status": "pending",
               "notes": "Tenant provisioned"
             }
           ]
@@ -44,7 +44,7 @@
         {
           "id": "m_2",
           "title": "Phase 2: Accounting & ERP Synchronization",
-          "dueDate": "2026-11-28",
+          "dueDate": "2026-11-30",
           "tasks": [
             {
               "id": "t_2_1",
@@ -65,7 +65,7 @@
               "title": "Run 2-way sync test with 10 dummy transactions",
               "owner": "vendor",
               "status": "pending",
-              "notes": ""
+              "notes": "All passed"
             }
           ]
         },
@@ -79,21 +79,248 @@
               "title": "Define multi-level manager approval thresholds",
               "owner": "client",
               "status": "pending",
-              "notes": ""
+              "notes": "Tier 1: $500, Tier 2: $5000"
             },
             {
               "id": "t_3_2",
               "title": "Conduct 45-min live employee training session",
               "owner": "vendor",
               "status": "pending",
-              "notes": "Scheduled for Dec 10"
+              "notes": "Scheduled with HR"
             },
             {
               "id": "t_3_3",
               "title": "Issue 150 physical & virtual cards for team leads",
               "owner": "vendor",
               "status": "pending",
-              "notes": ""
+              "notes": "Batch generated"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan_demo_fintech",
+      "slug": "fintech-corp-onboarding",
+      "clientName": "FinTech Corp",
+      "planTitle": "Enterprise NetSuite ERP & 150 Card Rollout",
+      "targetDate": "2026-12-15",
+      "status": "active",
+      "clientContact": "Sarah Jenkins (Head of Finance)",
+      "vendorLead": "Alex Rivera (Founder's Office Lead)",
+      "summary": "Complete implementation roadmap to connect NetSuite, configure multi-tier approval policies, and dispatch 150 corporate cards.",
+      "createdAt": "2026-11-10T08:01:26.661Z",
+      "updatedAt": "2026-11-10T08:01:26.667Z",
+      "milestones": [
+        {
+          "id": "m_1",
+          "title": "Phase 1: Compliance & Account Verification",
+          "dueDate": "2026-11-18",
+          "tasks": [
+            {
+              "id": "t_1_1",
+              "title": "Submit KYB documents & authorized signatory IDs",
+              "owner": "client",
+              "status": "completed",
+              "notes": "Verified by compliance team"
+            },
+            {
+              "id": "t_1_2",
+              "title": "Configure Okta SAML 2.0 Single Sign-On",
+              "owner": "client",
+              "status": "completed",
+              "notes": "SSO tenant active"
+            },
+            {
+              "id": "t_1_3",
+              "title": "Provision Volopay production workspace & admin seats",
+              "owner": "vendor",
+              "status": "completed",
+              "notes": "Admin credentials issued"
+            }
+          ]
+        },
+        {
+          "id": "m_2",
+          "title": "Phase 2: Accounting & ERP Synchronization",
+          "dueDate": "2026-11-28",
+          "tasks": [
+            {
+              "id": "t_2_1",
+              "title": "Connect NetSuite Sandbox and grant OAuth token",
+              "owner": "client",
+              "status": "completed",
+              "notes": "Token validated"
+            },
+            {
+              "id": "t_2_2",
+              "title": "Map General Ledger (GL) Codes & Tax rules",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Mapped 48 categories, awaiting review"
+            },
+            {
+              "id": "t_2_3",
+              "title": "Run 2-way sync test with 10 dummy transactions",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Scheduled for next sprint"
+            }
+          ]
+        },
+        {
+          "id": "m_3",
+          "title": "Phase 3: Card Controls & Employee Rollout",
+          "dueDate": "2026-12-15",
+          "tasks": [
+            {
+              "id": "t_3_1",
+              "title": "Define multi-level manager approval thresholds",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Tier 1: $500, Tier 2: $5,000"
+            },
+            {
+              "id": "t_3_2",
+              "title": "Conduct 45-min live employee training session",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Calendar invite sent"
+            },
+            {
+              "id": "t_3_3",
+              "title": "Issue 150 physical & virtual cards for team leads",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "FedEx Priority tracking"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan_demo_apex",
+      "slug": "apex-logistics-fleet",
+      "clientName": "Apex Logistics",
+      "planTitle": "Fleet Fuel Cards & Travel Expense Automation",
+      "targetDate": "2026-12-20",
+      "status": "active",
+      "clientContact": "Marcus Vance (VP Operations)",
+      "vendorLead": "Alex Rivera (Founder's Office Lead)",
+      "summary": "Automated fuel spend management for 85 drivers, telematics integration, and daily odometer prompts.",
+      "createdAt": "2026-11-10T08:01:26.667Z",
+      "updatedAt": "2026-11-10T08:01:26.667Z",
+      "milestones": [
+        {
+          "id": "m_1",
+          "title": "Phase 1: Driver Roster & Merchant Category Locks",
+          "dueDate": "2026-11-25",
+          "tasks": [
+            {
+              "id": "t_1_1",
+              "title": "Upload driver roster & vehicle registration numbers",
+              "owner": "client",
+              "status": "completed",
+              "notes": "85 drivers loaded"
+            },
+            {
+              "id": "t_1_2",
+              "title": "Configure fuel merchant category code (MCC 5541) locks",
+              "owner": "vendor",
+              "status": "completed",
+              "notes": "Non-gas station transactions locked"
+            },
+            {
+              "id": "t_1_3",
+              "title": "Dispatch 85 contactless fleet cards",
+              "owner": "vendor",
+              "status": "completed",
+              "notes": "Shipped via FedEx"
+            }
+          ]
+        },
+        {
+          "id": "m_2",
+          "title": "Phase 2: Live Fuel Limits & Telematics Feeds",
+          "dueDate": "2026-12-10",
+          "tasks": [
+            {
+              "id": "t_2_1",
+              "title": "Set odometer prompt on card terminal swipe",
+              "owner": "vendor",
+              "status": "completed",
+              "notes": "Prompt active at pump"
+            },
+            {
+              "id": "t_2_2",
+              "title": "Review weekly fuel exception report with Operations Lead",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Scheduled for Friday"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan_demo_biohealth",
+      "slug": "biohealth-compliance",
+      "clientName": "BioHealth Labs",
+      "planTitle": "SOC 2 Type II Security & KYB Fast-Track",
+      "targetDate": "2026-11-30",
+      "status": "active",
+      "clientContact": "Dr. Elena Rostova (VP Infosec)",
+      "vendorLead": "Alex Rivera (Founder's Office Lead)",
+      "summary": "Security audit compliance, data processing agreements (DPA), and strict role-based spend boundaries.",
+      "createdAt": "2026-11-10T08:01:26.667Z",
+      "updatedAt": "2026-11-10T08:01:26.667Z",
+      "milestones": [
+        {
+          "id": "m_1",
+          "title": "Phase 1: Legal & Corporate Verification",
+          "dueDate": "2026-11-18",
+          "tasks": [
+            {
+              "id": "t_1_1",
+              "title": "Upload Certificate of Incorporation and TIN",
+              "owner": "client",
+              "status": "completed",
+              "notes": "KYB verified"
+            },
+            {
+              "id": "t_1_2",
+              "title": "Execute Mutual Non-Disclosure Agreement (MNDA)",
+              "owner": "client",
+              "status": "completed",
+              "notes": "Signed via DocuSign"
+            },
+            {
+              "id": "t_1_3",
+              "title": "Complete AML/OFAC sanctions screening",
+              "owner": "vendor",
+              "status": "completed",
+              "notes": "Pass"
+            }
+          ]
+        },
+        {
+          "id": "m_2",
+          "title": "Phase 2: Security & IAM Architecture",
+          "dueDate": "2026-11-28",
+          "tasks": [
+            {
+              "id": "t_2_1",
+              "title": "Enforce Google Workspace / Okta MFA policy",
+              "owner": "client",
+              "status": "completed",
+              "notes": "100% cardholders verified"
+            },
+            {
+              "id": "t_2_2",
+              "title": "Review SOC 2 Type II report & penetration test results",
+              "owner": "client",
+              "status": "completed",
+              "notes": "Audit package approved"
             }
           ]
         }

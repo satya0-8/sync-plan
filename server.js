@@ -103,11 +103,11 @@ function calculateProgress(plan) {
   return total === 0 ? 0 : Math.round((completed / total) * 100);
 }
 
-// Main HTTP request handler (works for both standalone node and Vercel serverless)
+// Main HTTP request handler (works for standalone node, Render, and Vercel serverless)
 function handleRequest(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-matched-path');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -115,8 +115,20 @@ function handleRequest(req, res) {
     return;
   }
 
-  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = parsedUrl.pathname;
+  // Resolve true route even if rewritten by Vercel serverless (/api/index.js)
+  const matchedPath = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-rewrite-url'] || '';
+  const rawPath = matchedPath || req.url || '/';
+  const parsedUrl = new URL(rawPath, `http://${req.headers.host || 'localhost'}`);
+  let pathname = parsedUrl.pathname;
+
+  // If Vercel passed /api/index.js as pathname but we have a matched route
+  if ((pathname === '/api/index.js' || pathname === '/api' || pathname === '/api/') && matchedPath) {
+    pathname = matchedPath;
+  }
+  // Strip trailing slash except for root
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    pathname = pathname.slice(0, -1);
+  }
 
   // Static file serving when running locally
   if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html' || pathname === '/admin')) {
@@ -132,6 +144,19 @@ function handleRequest(req, res) {
   if (req.method === 'GET' && pathname.startsWith('/public/')) {
     const relativePath = pathname.replace('/public/', '');
     serveFile(res, path.join(__dirname, 'public', relativePath));
+    return;
+  }
+
+  // Health check endpoint for monitoring & uptime
+  if (req.method === 'GET' && (pathname === '/api/health' || pathname === '/health')) {
+    sendJson(res, 200, {
+      status: 'healthy',
+      zeroAiEngine: true,
+      service: 'SyncPlan Claude MAP Platform',
+      version: '1.2.0',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString()
+    });
     return;
   }
 
@@ -162,7 +187,7 @@ function handleRequest(req, res) {
   // POST /api/plans
   if (req.method === 'POST' && (pathname === '/api/plans' || pathname === '/api/plans/')) {
     parseBody(req, (err, body) => {
-      if (err) return sendJson(res, 400, { success: false, error: 'Invalid JSON body' });
+      if (err || !body) return sendJson(res, 400, { success: false, error: 'Invalid JSON body' });
 
       const data = loadData();
       const id = 'plan_' + crypto.randomBytes(4).toString('hex');
@@ -179,8 +204,8 @@ function handleRequest(req, res) {
         targetDate: body.targetDate || '',
         status: body.status || 'active',
         clientContact: body.clientContact || '',
-        vendorLead: body.vendorLead || '',
-        summary: body.summary || '',
+        vendorLead: body.vendorLead || 'Alex Rivera (Founder\'s Office Lead)',
+        summary: body.summary || 'Custom onboarding roadmap generated via SyncPlan.',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         milestones: Array.isArray(body.milestones) ? body.milestones.map((m, mIdx) => ({
@@ -209,11 +234,42 @@ function handleRequest(req, res) {
     return;
   }
 
+  // POST /api/plans/:id/duplicate
+  if (req.method === 'POST' && pathname.includes('/duplicate')) {
+    const id = pathname.replace('/api/plans/', '').replace('/duplicate', '');
+    const data = loadData();
+    const original = data.plans.find(p => p.id === id || p.slug === id);
+    if (!original) {
+      return sendJson(res, 404, { success: false, error: 'Plan not found to duplicate' });
+    }
+
+    const newId = 'plan_' + crypto.randomBytes(4).toString('hex');
+    const newSlug = original.slug.replace(/-\d+$/, '') + '-copy-' + Math.floor(100 + Math.random() * 900);
+    const duplicated = {
+      ...JSON.parse(JSON.stringify(original)),
+      id: newId,
+      slug: newSlug,
+      clientName: `${original.clientName} (Copy)`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    data.plans.unshift(duplicated);
+    saveData(data);
+
+    sendJson(res, 201, {
+      success: true,
+      message: 'Plan duplicated successfully',
+      plan: { ...duplicated, progress: calculateProgress(duplicated) }
+    });
+    return;
+  }
+
   // PUT /api/plans/:id
   if (req.method === 'PUT' && pathname.startsWith('/api/plans/')) {
     const id = pathname.replace('/api/plans/', '');
     parseBody(req, (err, body) => {
-      if (err) return sendJson(res, 400, { success: false, error: 'Invalid JSON body' });
+      if (err || !body) return sendJson(res, 400, { success: false, error: 'Invalid JSON body' });
 
       const data = loadData();
       const idx = data.plans.findIndex(p => p.id === id || p.slug === id);
@@ -255,6 +311,7 @@ function handleRequest(req, res) {
 
       let found = false;
       for (const m of plan.milestones) {
+        if (!m.tasks) continue;
         for (const t of m.tasks) {
           if (t.id === taskId) {
             if (body && typeof body.status === 'string') {
@@ -264,6 +321,12 @@ function handleRequest(req, res) {
             }
             if (body && typeof body.notes === 'string') {
               t.notes = body.notes;
+            }
+            if (body && typeof body.title === 'string') {
+              t.title = body.title;
+            }
+            if (body && typeof body.owner === 'string') {
+              t.owner = body.owner;
             }
             found = true;
             break;
@@ -296,7 +359,7 @@ function handleRequest(req, res) {
       return sendJson(res, 404, { success: false, error: 'Plan not found' });
     }
     saveData(data);
-    sendJson(res, 200, { success: true, message: 'Plan deleted' });
+    sendJson(res, 200, { success: true, message: 'Plan deleted successfully' });
     return;
   }
 
@@ -304,7 +367,7 @@ function handleRequest(req, res) {
   if (req.method === 'POST' && (pathname === '/mcp' || pathname === '/api/mcp')) {
     parseBody(req, (err, rpcRequest) => {
       if (err || !rpcRequest) {
-        return sendJson(res, 400, { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } });
+        return sendJson(res, 400, { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error: invalid JSON payload' } });
       }
       handleMcpRpc(rpcRequest, req.headers.host, (rpcResponse) => {
         sendJson(res, 200, rpcResponse);
@@ -314,11 +377,12 @@ function handleRequest(req, res) {
   }
 
   // MCP SSE Stream
-  if (req.method === 'GET' && pathname === '/sse') {
+  if (req.method === 'GET' && (pathname === '/sse' || pathname === '/api/sse')) {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
     });
     const endpointUrl = `https://${req.headers.host || 'localhost:3000'}/mcp`;
     res.write(`event: endpoint\ndata: ${endpointUrl}\n\n`);
@@ -327,11 +391,15 @@ function handleRequest(req, res) {
     return;
   }
 
-  sendJson(res, 404, { error: 'Not found' });
+  sendJson(res, 404, { success: false, error: `Route '${pathname}' not found` });
 }
 
 function handleMcpRpc(rpc, host, callback) {
-  const { method, params, id } = rpc;
+  if (!rpc || typeof rpc !== 'object') {
+    return callback({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Invalid Request: payload must be a JSON object' } });
+  }
+
+  const { method, params = {}, id = 1 } = rpc;
   const proto = host && host.includes('localhost') ? 'http' : 'https';
   const baseUrl = host ? `${proto}://${host}` : 'http://localhost:3000';
 
@@ -341,14 +409,33 @@ function handleMcpRpc(rpc, host, callback) {
       id,
       result: {
         protocolVersion: '2024-11-05',
-        capabilities: { tools: {} },
-        serverInfo: { name: 'SyncPlan-MCP', version: '1.0.0' }
+        capabilities: { tools: {}, prompts: {}, resources: {} },
+        serverInfo: { name: 'SyncPlan-MCP', version: '1.2.0' }
       }
     });
   }
 
   if (method === 'notifications/initialized') {
     return callback({ jsonrpc: '2.0', id, result: {} });
+  }
+
+  if (method === 'prompts/list') {
+    return callback({
+      jsonrpc: '2.0',
+      id,
+      result: {
+        prompts: [
+          {
+            name: 'create_onboarding_plan',
+            description: 'Takes kickoff meeting notes or sales handoff text and extracts a structured 4-phase Mutual Action Plan for customer onboarding.',
+            arguments: [
+              { name: 'clientName', description: 'Name of customer company', required: true },
+              { name: 'kickoffNotes', description: 'Raw notes, transcripts, or objectives', required: true }
+            ]
+          }
+        ]
+      }
+    });
   }
 
   if (method === 'tools/list') {
@@ -366,9 +453,9 @@ function handleMcpRpc(rpc, host, callback) {
                 clientName: { type: 'string', description: 'Name of the client company (e.g. Acme Corp)' },
                 planTitle: { type: 'string', description: 'Title of the onboarding plan' },
                 targetDate: { type: 'string', description: 'Target completion date (YYYY-MM-DD)' },
-                clientContact: { type: 'string', description: 'Primary client contact' },
+                clientContact: { type: 'string', description: 'Primary client contact name & email' },
                 vendorLead: { type: 'string', description: 'Vendor account lead' },
-                summary: { type: 'string', description: 'Summary of scope' },
+                summary: { type: 'string', description: 'Summary of onboarding scope and goals' },
                 milestones: {
                   type: 'array',
                   items: {
@@ -406,8 +493,36 @@ function handleMcpRpc(rpc, host, callback) {
             description: 'Fetches real-time status and tasks for a specific plan.',
             inputSchema: {
               type: 'object',
-              properties: { planId: { type: 'string' } },
+              properties: { planId: { type: 'string', description: 'Plan ID or slug' } },
               required: ['planId']
+            }
+          },
+          {
+            name: 'update_plan_task',
+            description: 'Updates task status (completed/pending) or notes within an active plan.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                planId: { type: 'string' },
+                taskId: { type: 'string' },
+                status: { type: 'string', enum: ['completed', 'pending'] },
+                notes: { type: 'string' }
+              },
+              required: ['planId', 'taskId']
+            }
+          },
+          {
+            name: 'add_milestone',
+            description: 'Appends a new milestone phase and tasks to an existing onboarding plan.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                planId: { type: 'string' },
+                title: { type: 'string' },
+                dueDate: { type: 'string' },
+                tasks: { type: 'array' }
+              },
+              required: ['planId', 'title']
             }
           }
         ]
@@ -416,7 +531,7 @@ function handleMcpRpc(rpc, host, callback) {
   }
 
   if (method === 'tools/call') {
-    const { name, arguments: args } = params;
+    const { name, arguments: args = {} } = params || {};
     const data = loadData();
 
     if (name === 'create_action_plan') {
@@ -429,27 +544,27 @@ function handleMcpRpc(rpc, host, callback) {
       const newPlan = {
         id: planId,
         slug,
-        clientName: args.clientName,
-        planTitle: args.planTitle,
+        clientName: args.clientName || 'Unnamed Client',
+        planTitle: args.planTitle || 'Client Onboarding Roadmap',
         targetDate: args.targetDate || '',
         status: 'active',
         clientContact: args.clientContact || '',
-        vendorLead: args.vendorLead || '',
-        summary: args.summary || '',
+        vendorLead: args.vendorLead || 'Alex Rivera (Founder\'s Office Lead)',
+        summary: args.summary || 'Customer onboarding blueprint generated via Claude MCP.',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        milestones: (args.milestones || []).map((m, mIdx) => ({
+        milestones: Array.isArray(args.milestones) ? args.milestones.map((m, mIdx) => ({
           id: `m_${mIdx + 1}`,
           title: m.title || `Phase ${mIdx + 1}`,
           dueDate: m.dueDate || '',
-          tasks: (m.tasks || []).map((t, tIdx) => ({
+          tasks: Array.isArray(m.tasks) ? m.tasks.map((t, tIdx) => ({
             id: `t_${mIdx + 1}_${tIdx + 1}`,
-            title: t.title,
+            title: t.title || 'Action item',
             owner: t.owner === 'client' ? 'client' : 'vendor',
             status: 'pending',
             notes: t.notes || ''
-          }))
-        }))
+          })) : []
+        })) : []
       };
 
       data.plans.unshift(newPlan);
@@ -508,10 +623,124 @@ function handleMcpRpc(rpc, host, callback) {
       });
     }
 
+    if (name === 'update_plan_task') {
+      const plan = data.plans.find(p => p.id === args.planId || p.slug === args.planId);
+      if (!plan) {
+        return callback({
+          jsonrpc: '2.0',
+          id,
+          result: { isError: true, content: [{ type: 'text', text: `Plan '${args.planId}' not found.` }] }
+        });
+      }
+
+      let found = false;
+      for (const m of plan.milestones) {
+        if (!m.tasks) continue;
+        for (const t of m.tasks) {
+          if (t.id === args.taskId) {
+            if (args.status) t.status = args.status;
+            if (args.notes) t.notes = args.notes;
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
+      }
+
+      if (!found) {
+        return callback({
+          jsonrpc: '2.0',
+          id,
+          result: { isError: true, content: [{ type: 'text', text: `Task '${args.taskId}' not found in plan '${args.planId}'.` }] }
+        });
+      }
+
+      plan.updatedAt = new Date().toISOString();
+      saveData(data);
+
+      return callback({
+        jsonrpc: '2.0',
+        id,
+        result: {
+          content: [{ type: 'text', text: `Task '${args.taskId}' updated successfully. Progress is now ${calculateProgress(plan)}%.` }]
+        }
+      });
+    }
+
+    if (name === 'add_milestone') {
+      const plan = data.plans.find(p => p.id === args.planId || p.slug === args.planId);
+      if (!plan) {
+        return callback({
+          jsonrpc: '2.0',
+          id,
+          result: { isError: true, content: [{ type: 'text', text: `Plan '${args.planId}' not found.` }] }
+        });
+      }
+
+      const mIdx = plan.milestones.length + 1;
+      const newM = {
+        id: `m_${Date.now()}`,
+        title: args.title || `Phase ${mIdx}`,
+        dueDate: args.dueDate || '',
+        tasks: Array.isArray(args.tasks) ? args.tasks.map((t, tIdx) => ({
+          id: `t_${mIdx}_${tIdx + 1}`,
+          title: t.title || 'Task',
+          owner: t.owner === 'client' ? 'client' : 'vendor',
+          status: 'pending',
+          notes: t.notes || ''
+        })) : []
+      };
+
+      plan.milestones.push(newM);
+      plan.updatedAt = new Date().toISOString();
+      saveData(data);
+
+      return callback({
+        jsonrpc: '2.0',
+        id,
+        result: {
+          content: [{ type: 'text', text: `Milestone '${newM.title}' added to plan. Live portal updated immediately.` }]
+        }
+      });
+    }
+
     return callback({ jsonrpc: '2.0', id, error: { code: -32601, message: `Tool '${name}' not recognized` } });
   }
 
   return callback({ jsonrpc: '2.0', id, error: { code: -32601, message: `Method '${method}' not found` } });
+}
+
+function parseBody(req, callback) {
+  // If runtime (Vercel serverless / Express) has already parsed req.body
+  if (req.body !== undefined && req.body !== null) {
+    if (typeof req.body === 'object') {
+      return callback(null, req.body);
+    }
+    if (typeof req.body === 'string') {
+      try {
+        return callback(null, JSON.parse(req.body));
+      } catch (e) {
+        return callback(e, null);
+      }
+    }
+  }
+
+  let body = '';
+  req.on('data', chunk => {
+    body += chunk;
+    if (body.length > 2e6) req.connection.destroy();
+  });
+  req.on('end', () => {
+    try {
+      const parsed = body ? JSON.parse(body) : {};
+      callback(null, parsed);
+    } catch (e) {
+      callback(e, null);
+    }
+  });
+  req.on('error', (err) => {
+    callback(err, null);
+  });
 }
 
 function serveFile(res, filePath, contentType) {
@@ -533,6 +762,8 @@ function getMimeType(file) {
   if (ext === '.css') return 'text/css';
   if (ext === '.js') return 'application/javascript';
   if (ext === '.json') return 'application/json';
+  if (ext === '.png') return 'image/png';
+  if (ext === '.svg') return 'image/svg+xml';
   return 'text/plain';
 }
 
@@ -541,28 +772,28 @@ function sendJson(res, statusCode, obj) {
   res.end(JSON.stringify(obj));
 }
 
-function parseBody(req, callback) {
-  let body = '';
-  req.on('data', chunk => {
-    body += chunk;
-    if (body.length > 2e6) req.connection.destroy();
-  });
-  req.on('end', () => {
-    try {
-      const parsed = body ? JSON.parse(body) : {};
-      callback(null, parsed);
-    } catch (e) {
-      callback(e, null);
-    }
-  });
-}
-
 // If invoked as standalone server
 if (require.main === module) {
-  const server = http.createServer(handleRequest);
-  server.listen(PORT, () => {
-    console.log(`SyncPlan running on port ${PORT}`);
-  });
+  function startServer(portToTry) {
+    const srv = http.createServer(handleRequest);
+    srv.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        startServer(portToTry + 1);
+      } else {
+        console.error('Server error:', err);
+      }
+    });
+
+    srv.listen(portToTry, () => {
+      console.log(`\n======================================================`);
+      console.log(`🚀 SyncPlan Zero-AI Platform is LIVE!`);
+      console.log(`• Admin Workspace & Editor : http://localhost:${portToTry}/admin`);
+      console.log(`• Live Client Portal       : http://localhost:${portToTry}/plan/fintech-corp-onboarding`);
+      console.log(`• MCP Remote SSE Endpoint  : http://localhost:${portToTry}/sse`);
+      console.log(`======================================================\n`);
+    });
+  }
+  startServer(Number(PORT));
 }
 
 module.exports = handleRequest;

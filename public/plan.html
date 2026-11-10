@@ -5,73 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Onboarding Portal — SyncPlan</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     code { font-family: 'JetBrains Mono', monospace; }
+    .glass-card {
+      background: rgba(13, 17, 29, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    @media print {
+      header, footer, .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .glass-card { background: white !important; border: 1px solid #ccc !important; color: black !important; }
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#080B13] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none p-3 bg-slate-900 border border-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-xl shadow-2xl flex items-center space-x-2">
+    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+    <span id="toastMsg">Synced</span>
+  </div>
 
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-30">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+  <header class="border-b border-slate-800/80 bg-[#090D18]/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      
       <div class="flex items-center space-x-3">
-        <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-600/30">
+        <a href="/admin" title="Go to Admin Workspace" class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-600/30 hover:opacity-90 transition-opacity">
           SP
-        </div>
+        </a>
         <div>
-          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Implementation Portal</div>
-          <div id="navClientName" class="text-sm font-bold text-white tracking-tight">Client Workspace</div>
+          <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Client Implementation Portal</div>
+          <div id="navClientName" class="text-sm font-extrabold text-white tracking-tight">Client Workspace</div>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <span class="inline-flex items-center space-x-1.5 text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+      <div class="flex items-center space-x-2.5">
+        <span class="inline-flex items-center space-x-1.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full">
           <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Live Synced</span>
+          <span>Live Synced via Claude MCP</span>
         </span>
-        <button onclick="fetchPlanDetails()" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-800 bg-slate-900">
-          Refresh
+
+        <button onclick="copyShareLink()" title="Copy Public Link" class="no-print text-xs text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-colors flex items-center space-x-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+          <span class="hidden sm:inline">Share</span>
+        </button>
+
+        <button onclick="window.print()" title="Print / PDF" class="no-print text-xs text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-colors flex items-center space-x-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span class="hidden sm:inline">PDF</span>
         </button>
       </div>
+
     </div>
   </header>
 
   <!-- Hero & Progress Overview -->
-  <div class="border-b border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-slate-950">
+  <div class="border-b border-slate-800/80 bg-gradient-to-b from-[#0D1222] via-[#090D18] to-[#080B13]">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div class="space-y-2 max-w-2xl">
+        <div class="space-y-2.5 max-w-2xl">
           <div class="flex items-center space-x-2">
-            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30" id="badgeClientName">Client</span>
-            <span class="text-xs text-slate-500">Mutual Action Plan</span>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30" id="badgeClientName">Client</span>
+            <span class="text-xs text-slate-500">Mutual Action Plan (MAP)</span>
           </div>
-          <h1 id="heroPlanTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Onboarding & Rollout</h1>
-          <p id="heroSummary" class="text-sm text-slate-300 leading-relaxed"></p>
+          <h1 id="heroPlanTitle" class="text-2xl sm:text-3xl font-black text-white tracking-tight">Onboarding & Rollout</h1>
+          <p id="heroSummary" class="text-xs sm:text-sm text-slate-300 leading-relaxed"></p>
         </div>
 
         <!-- Target Date & Progress Box -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 min-w-[240px] shadow-lg shrink-0 space-y-3">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:min-w-[260px] shadow-2xl shrink-0 space-y-3">
           <div class="flex items-center justify-between text-xs text-slate-400">
             <span>Target Go-Live:</span>
             <span id="heroTargetDate" class="font-bold text-white"></span>
           </div>
           <div class="space-y-1.5">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-slate-300">Completion</span>
-              <span id="progressText" class="text-sm font-extrabold text-emerald-400">0%</span>
+              <span class="text-xs font-semibold text-slate-300">Overall Completion</span>
+              <span id="progressText" class="text-sm font-black text-emerald-400 font-mono">0%</span>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+            <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
               <div id="progressBar" class="bg-gradient-to-r from-indigo-500 via-indigo-400 to-emerald-400 h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div>
             </div>
           </div>
           <div class="flex justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/80">
-            <span id="tasksCompletedCount">0 done</span>
-            <span id="tasksTotalCount">0 total</span>
+            <span id="tasksCompletedCount" class="font-medium">0 done</span>
+            <span id="tasksTotalCount" class="font-medium">0 total</span>
           </div>
         </div>
       </div>
@@ -83,19 +110,20 @@
   <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
 
     <!-- Responsibilities Quick Tabs -->
-    <div class="flex items-center justify-between pb-2">
-      <div class="flex items-center space-x-2">
-        <button onclick="setFilter('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-colors">
-          All Milestones
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 gap-3 no-print">
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="setFilter('all')" id="filterAll" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-colors">
+          All Deliverables
         </button>
-        <button onclick="setFilter('client')" id="filterClient" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800 transition-colors">
-          Your Action Items (Client)
+        <button onclick="setFilter('client')" id="filterClient" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-colors flex items-center space-x-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span>Your Action Items (Client)</span>
         </button>
-        <button onclick="setFilter('vendor')" id="filterVendor" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800 transition-colors">
+        <button onclick="setFilter('vendor')" id="filterVendor" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800 transition-colors">
           Vendor Deliverables (Volopay)
         </button>
       </div>
-      <div class="text-xs text-slate-500 hidden sm:block">
+      <div class="text-xs text-slate-500">
         Click checkboxes to update live progress
       </div>
     </div>
@@ -105,25 +133,27 @@
       <!-- Injected by JS -->
     </div>
 
-    <!-- Team Contact Footer Card -->
+    <!-- Team Contact Card -->
     <div class="mt-12 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center space-x-4">
-        <div class="h-10 w-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold text-sm">
-          Lead
+        <div class="h-11 w-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-extrabold text-sm shadow-md">
+          AL
         </div>
         <div>
-          <div class="text-xs text-slate-400">Implementation Manager</div>
-          <div id="footerVendorLead" class="text-sm font-bold text-white">Alex Rivera — Founder's Office</div>
+          <div class="text-[11px] font-semibold text-indigo-400 uppercase tracking-wider">Implementation Lead</div>
+          <div id="footerVendorLead" class="text-sm font-extrabold text-white">Alex Rivera — Founder's Office Lead</div>
+          <div class="text-xs text-slate-400">Volopay Product & Implementation</div>
         </div>
       </div>
-      <div class="text-xs text-slate-400 text-center sm:text-right">
-        Questions about your rollout? Reply directly to your Slack Connect channel or email your lead.
+      <div class="text-xs text-slate-400 text-center sm:text-right space-y-1">
+        <div>Need assistance with your onboarding?</div>
+        <a href="mailto:support@volopay.co" class="text-indigo-400 hover:text-indigo-300 font-semibold underline">Contact Implementation Team</a>
       </div>
     </div>
 
   </main>
 
-  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600 no-print">
     Powered by SyncPlan • Zero-AI Autonomous Coordination • Runs on Customer's Claude
   </footer>
 
@@ -136,9 +166,15 @@
     });
 
     async function fetchPlanDetails() {
-      // Extract plan ID/slug from URL path: /plan/:slug
-      const pathParts = window.location.pathname.split('/');
-      let planId = pathParts[pathParts.length - 1];
+      // Extract plan ID/slug from URL path: /plan/:slug or query ?plan=...
+      const urlParams = new URLSearchParams(window.location.search);
+      let planId = urlParams.get('plan') || urlParams.get('id');
+
+      if (!planId) {
+        const pathParts = window.location.pathname.split('/');
+        planId = pathParts[pathParts.length - 1];
+      }
+
       if (!planId || planId === 'plan' || planId === 'plan.html') {
         planId = 'fintech-corp-onboarding';
       }
@@ -150,7 +186,25 @@
           planData = result.plan;
           renderPlan();
         } else {
-          document.body.innerHTML = `<div class="text-center py-24 text-slate-400"><h3>Plan not found.</h3><p class="text-xs mt-2 text-slate-600">Check the URL or contact your implementation lead.</p></div>`;
+          // If not found, load all plans and pick the first
+          const allRes = await fetch('/api/plans');
+          const allData = await allRes.json();
+          if (allData.success && allData.plans.length > 0) {
+            planData = allData.plans[0];
+            renderPlan();
+          } else {
+            document.body.innerHTML = `
+              <div class="min-h-screen flex items-center justify-center p-4">
+                <div class="text-center py-12 glass-card p-8 rounded-2xl max-w-md w-full border border-slate-800">
+                  <h3 class="text-base font-bold text-white">Plan Not Found</h3>
+                  <p class="text-xs text-slate-400 mt-2">Check the URL or return to the workspace editor.</p>
+                  <a href="/admin" class="mt-4 inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold">
+                    Go to SyncPlan Workspace
+                  </a>
+                </div>
+              </div>
+            `;
+          }
         }
       } catch (err) {
         console.error('Failed to load plan:', err);
@@ -173,7 +227,7 @@
       // Calculations
       let totalTasks = 0;
       let completedTasks = 0;
-      planData.milestones.forEach(m => {
+      (planData.milestones || []).forEach(m => {
         if (m.tasks) {
           m.tasks.forEach(t => {
             totalTasks++;
@@ -185,23 +239,38 @@
 
       document.getElementById('progressText').innerText = `${pct}%`;
       document.getElementById('progressBar').style.width = `${pct}%`;
-      document.getElementById('tasksCompletedCount').innerText = `${completedTasks} tasks done`;
+      document.getElementById('tasksCompletedCount').innerText = `${completedTasks} done`;
       document.getElementById('tasksTotalCount').innerText = `${totalTasks} total tasks`;
 
       renderMilestonesList();
+
+      // Trigger celebration if 100% completed
+      if (pct === 100 && totalTasks > 0) {
+        triggerCelebration();
+      }
+    }
+
+    function triggerCelebration() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
     }
 
     function setFilter(filter) {
       currentFilter = filter;
       document.getElementById('filterAll').className = filter === 'all' 
-        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm' 
-        : 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
+        ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm' 
+        : 'px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
       document.getElementById('filterClient').className = filter === 'client' 
-        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white shadow-sm' 
-        : 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
+        ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 shadow-sm flex items-center space-x-1' 
+        : 'px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800 flex items-center space-x-1';
       document.getElementById('filterVendor').className = filter === 'vendor' 
-        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm' 
-        : 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
+        ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm' 
+        : 'px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
       renderMilestonesList();
     }
 
@@ -213,14 +282,13 @@
       }
 
       container.innerHTML = planData.milestones.map((m, mIdx) => {
-        // Filter tasks
         const visibleTasks = (m.tasks || []).filter(t => {
           if (currentFilter === 'all') return true;
           return t.owner === currentFilter;
         });
 
         if (visibleTasks.length === 0 && currentFilter !== 'all') {
-          return ''; // Hide phase if no tasks match filter
+          return '';
         }
 
         const mTotal = m.tasks ? m.tasks.length : 0;
@@ -228,20 +296,20 @@
         const isPhaseComplete = mTotal > 0 && mDone === mTotal;
 
         return `
-          <div class="bg-slate-900/80 border ${isPhaseComplete ? 'border-emerald-500/30' : 'border-slate-800'} rounded-2xl p-6 shadow-xl space-y-4 transition-all">
+          <div class="glass-card ${isPhaseComplete ? 'border-emerald-500/30' : 'border-slate-800'} rounded-2xl p-6 shadow-xl space-y-4 transition-all">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-2">
               <div class="flex items-center space-x-3">
-                <div class="h-7 w-7 rounded-full ${isPhaseComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'} flex items-center justify-center font-bold text-xs">
+                <div class="h-8 w-8 rounded-xl ${isPhaseComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'} flex items-center justify-center font-black text-xs border border-white/5">
                   ${isPhaseComplete ? '✓' : (mIdx + 1)}
                 </div>
                 <div>
-                  <h3 class="text-base font-bold text-white tracking-tight">${m.title}</h3>
-                  <div class="text-xs text-slate-400">${mDone} of ${mTotal} completed ${m.dueDate ? `• Target: ${m.dueDate}` : ''}</div>
+                  <h3 class="text-base font-extrabold text-white tracking-tight">${m.title}</h3>
+                  <div class="text-xs text-slate-400">${mDone} of ${mTotal} deliverables completed ${m.dueDate ? `• Target: ${m.dueDate}` : ''}</div>
                 </div>
               </div>
               <div>
-                <span class="text-xs font-medium px-2.5 py-1 rounded-full ${isPhaseComplete ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">
-                  ${isPhaseComplete ? 'Completed' : 'In Progress'}
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full ${isPhaseComplete ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800/80 text-slate-400'}">
+                  ${isPhaseComplete ? 'Phase Complete' : 'In Progress'}
                 </span>
               </div>
             </div>
@@ -253,7 +321,7 @@
                 const isClient = task.owner === 'client';
 
                 return `
-                  <div class="group flex items-start space-x-3 p-3.5 rounded-xl border ${isCompleted ? 'bg-slate-950/40 border-slate-800/50' : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'} transition-all">
+                  <div class="group flex items-start space-x-3.5 p-3.5 rounded-xl border ${isCompleted ? 'bg-slate-950/40 border-slate-800/50' : 'bg-slate-950/80 border-slate-800/90 hover:border-slate-700'} transition-all">
                     <div class="pt-0.5">
                       <input 
                         type="checkbox" 
@@ -267,7 +335,7 @@
                         <span class="text-sm font-semibold ${isCompleted ? 'line-through text-slate-500' : 'text-slate-100'}">
                           ${task.title}
                         </span>
-                        <span class="inline-flex self-start sm:self-auto text-[10px] font-semibold px-2 py-0.5 rounded ${isClient ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}">
+                        <span class="inline-flex self-start sm:self-auto text-[10px] font-bold px-2 py-0.5 rounded ${isClient ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'}">
                           ${isClient ? 'Action Required: You (Client)' : 'Volopay Team'}
                         </span>
                       </div>
@@ -283,6 +351,19 @@
     }
 
     async function toggleTaskStatus(taskId) {
+      // Optimistic update
+      for (const m of planData.milestones) {
+        if (!m.tasks) continue;
+        for (const t of m.tasks) {
+          if (t.id === taskId) {
+            t.status = t.status === 'completed' ? 'pending' : 'completed';
+            break;
+          }
+        }
+      }
+      renderPlan();
+      showToastNotification('Task status updated');
+
       try {
         const res = await fetch(`/api/plans/${planData.id}/tasks/${taskId}`, {
           method: 'PATCH',
@@ -295,8 +376,24 @@
           renderPlan();
         }
       } catch (err) {
-        alert('Failed to update task: ' + err.message);
+        console.error('Task update failed:', err);
       }
+    }
+
+    function copyShareLink() {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href);
+      }
+      showToastNotification('Public portal link copied to clipboard!');
+    }
+
+    function showToastNotification(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.remove('translate-y-10', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0');
+      }, 3000);
     }
   </script>
 </body>
