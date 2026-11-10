@@ -62,6 +62,9 @@ async function makeApiCall(method, endpoint, body) {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', () => {
+          if (res.statusCode >= 400) {
+            return resolve(null);
+          }
           try {
             resolve(JSON.parse(data));
           } catch (e) {

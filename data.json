@@ -1,6 +1,142 @@
 {
   "plans": [
     {
+      "id": "plan_5e3b8db2",
+      "slug": "acme-health-872",
+      "clientName": "ACME Health",
+      "planTitle": "Spend management and net suite rollout",
+      "targetDate": "2027-01-10",
+      "status": "active",
+      "clientContact": "",
+      "vendorLead": "Alex Rivera (Founder's Office Lead)",
+      "summary": "Here are our kickoff notes for Apex Logistics. Set up a 3-phase corporate card and fuel spend onboarding plan:\n\n---\nCLIENT KICKOFF CALL NOTES: APEX LOGISTICS\nDate: Nov 10, 2026\nAttendees: \n- Marcus Vance (VP of Operations, Apex Logistics - marcus@apexlogistics.com)\n- Rachel Adams (Head of Finance, Apex Logistics)\n- Alex Rivera (Implementation Lead, Volopay)\n\nTarget Go-Live Date: December 20, 2026\nScope & Objectives:\nApex Logistics operates a regional and interstate fleet with 85 commercial drivers. They are experiencing ~12% monthly spend leakage due to paper fuel receipts, lost reimbursement slips, and non-fuel convenience store purchases on personal cards. They need an automated spend management rollout with merchant category locks and accounting sync.\n\nKey Decisions & Action Items from Kickoff:\n\nPHASE 1: Fleet Roster & Spend Policy Setup (Target: Nov 25, 2026)\n- Apex team needs to upload the master roster of 85 drivers, including vehicle registration numbers and state license IDs.\n- Volopay team will configure Merchant Category Code (MCC) locks — strictly lock cards to MCC 5541 (Service Stations / Fuel) and disable non-fuel convenience retail.\n- Volopay underwriting must approve and activate the $250k revolving fleet credit line.\n- Apex Finance (Rachel) needs to confirm multi-tier manager approval thresholds: any expense over $350 requires automated dispatcher sign-off.\n\nPHASE 2: Card Logistics & ERP Accounting Sync (Target: Dec 8, 2026)\n- Volopay operations will bulk-dispatch 85 physical contactless fleet cards via FedEx Priority with individual tracking numbers.\n- Apex IT/Finance will connect their QuickBooks Online production tenant via OAuth 2.0.\n- Volopay implementation engineer will map Chart of Accounts (COA) to default fuel account #6240 and toll account #6250.\n- Run a 2-way dummy sync test with 10 simulated fuel transactions to ensure clean GL journal entry posting.\n\nPHASE 3: Driver Rollout, Telematics & Go-Live (Target: Dec 20, 2026)\n- Volopay to conduct a 30-minute live webinar training for dispatchers and fleet managers on instant card freeze/unfreeze controls.\n- Apex drivers to download the mobile app and verify mobile numbers for card activation.\n- Configure mandatory odometer and vehicle ID prompts on the POS terminal whenever a fuel pump card is swiped.\n- Final executive sign-off from Marcus Vance and full cutover to live fleet spending.\n---\n\nPlease call the create_action_plan MCP tool with these details, assigning responsibilities accurately between client and vendor.",
+      "createdAt": "2026-11-10T08:19:35.721Z",
+      "updatedAt": "2026-11-10T08:19:52.636Z",
+      "milestones": [
+        {
+          "id": "m_1",
+          "title": "Phase 1: Kickoff & Prerequisites",
+          "dueDate": "2027-01-10",
+          "tasks": [
+            {
+              "id": "t_1_1",
+              "title": "Complete initial requirements review",
+              "owner": "client",
+              "status": "pending",
+              "notes": ""
+            },
+            {
+              "id": "t_1_2",
+              "title": "Provision client environment",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": ""
+            }
+          ]
+        }
+      ],
+      "progress": 0
+    },
+    {
+      "id": "plan_edc83c2f",
+      "slug": "fintech-corp-495",
+      "clientName": "FinTech Corp",
+      "planTitle": "Enterprise ERP Integration & Card Rollout",
+      "targetDate": "2026-12-15",
+      "status": "active",
+      "clientContact": "",
+      "vendorLead": "Alex Rivera (Founder's Office Lead)",
+      "summary": "Simulated Claude cognitive synthesis for FinTech Corp.",
+      "createdAt": "2026-11-10T08:18:12.019Z",
+      "updatedAt": "2026-11-10T08:18:12.019Z",
+      "milestones": [
+        {
+          "id": "m_1",
+          "title": "Phase 1: Compliance & Account Verification",
+          "dueDate": "2026-11-20",
+          "tasks": [
+            {
+              "id": "t_1_1",
+              "title": "Submit KYB documents & authorized signatory IDs",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Verified by compliance"
+            },
+            {
+              "id": "t_1_2",
+              "title": "Configure Okta SAML 2.0 Single Sign-On",
+              "owner": "client",
+              "status": "pending",
+              "notes": "IT authorization required"
+            },
+            {
+              "id": "t_1_3",
+              "title": "Provision Volopay production tenant & roles",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Tenant provisioned"
+            }
+          ]
+        },
+        {
+          "id": "m_2",
+          "title": "Phase 2: Accounting & ERP Synchronization",
+          "dueDate": "2026-11-30",
+          "tasks": [
+            {
+              "id": "t_2_1",
+              "title": "Connect NetSuite Sandbox and grant OAuth token",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Awaiting IT credentials"
+            },
+            {
+              "id": "t_2_2",
+              "title": "Map General Ledger (GL) Codes & Tax rules",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Mapped 48 categories"
+            },
+            {
+              "id": "t_2_3",
+              "title": "Run 2-way sync test with 10 dummy transactions",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "All passed"
+            }
+          ]
+        },
+        {
+          "id": "m_3",
+          "title": "Phase 3: Card Controls & Employee Rollout",
+          "dueDate": "2026-12-15",
+          "tasks": [
+            {
+              "id": "t_3_1",
+              "title": "Define multi-level manager approval thresholds",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Tier 1: $500, Tier 2: $5000"
+            },
+            {
+              "id": "t_3_2",
+              "title": "Conduct 45-min live employee training session",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Scheduled with HR"
+            },
+            {
+              "id": "t_3_3",
+              "title": "Issue 150 physical & virtual cards for team leads",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Batch generated"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "plan_2ee3fc07",
       "slug": "fintech-corp-182",
       "clientName": "FinTech Corp",
