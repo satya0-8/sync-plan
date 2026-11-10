@@ -1,0 +1,23 @@
+{
+  "name": "syncplan",
+  "version": "1.0.0",
+  "description": "Zero-AI Mutual Action Plans & Client Onboarding Platform Powered by Claude via MCP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "mcp": "node mcp-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "zero-ai",
+    "client-onboarding",
+    "mutual-action-plans"
+  ],
+  "author": "Founder's Office Candidate",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

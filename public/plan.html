@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Onboarding Portal — SyncPlan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    code { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-600/30">
+          SP
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Implementation Portal</div>
+          <div id="navClientName" class="text-sm font-bold text-white tracking-tight">Client Workspace</div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center space-x-1.5 text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Live Synced</span>
+        </span>
+        <button onclick="fetchPlanDetails()" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-800 bg-slate-900">
+          Refresh
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero & Progress Overview -->
+  <div class="border-b border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-slate-950">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="space-y-2 max-w-2xl">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30" id="badgeClientName">Client</span>
+            <span class="text-xs text-slate-500">Mutual Action Plan</span>
+          </div>
+          <h1 id="heroPlanTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Onboarding & Rollout</h1>
+          <p id="heroSummary" class="text-sm text-slate-300 leading-relaxed"></p>
+        </div>
+
+        <!-- Target Date & Progress Box -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 min-w-[240px] shadow-lg shrink-0 space-y-3">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Target Go-Live:</span>
+            <span id="heroTargetDate" class="font-bold text-white"></span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-300">Completion</span>
+              <span id="progressText" class="text-sm font-extrabold text-emerald-400">0%</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+              <div id="progressBar" class="bg-gradient-to-r from-indigo-500 via-indigo-400 to-emerald-400 h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/80">
+            <span id="tasksCompletedCount">0 done</span>
+            <span id="tasksTotalCount">0 total</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main Content: Milestones & Tasks -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
+
+    <!-- Responsibilities Quick Tabs -->
+    <div class="flex items-center justify-between pb-2">
+      <div class="flex items-center space-x-2">
+        <button onclick="setFilter('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-colors">
+          All Milestones
+        </button>
+        <button onclick="setFilter('client')" id="filterClient" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800 transition-colors">
+          Your Action Items (Client)
+        </button>
+        <button onclick="setFilter('vendor')" id="filterVendor" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800 transition-colors">
+          Vendor Deliverables (Volopay)
+        </button>
+      </div>
+      <div class="text-xs text-slate-500 hidden sm:block">
+        Click checkboxes to update live progress
+      </div>
+    </div>
+
+    <!-- Milestones Accordion / Cards -->
+    <div id="milestonesList" class="space-y-6">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- Team Contact Footer Card -->
+    <div class="mt-12 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-4">
+        <div class="h-10 w-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold text-sm">
+          Lead
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">Implementation Manager</div>
+          <div id="footerVendorLead" class="text-sm font-bold text-white">Alex Rivera — Founder's Office</div>
+        </div>
+      </div>
+      <div class="text-xs text-slate-400 text-center sm:text-right">
+        Questions about your rollout? Reply directly to your Slack Connect channel or email your lead.
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
+    Powered by SyncPlan • Zero-AI Autonomous Coordination • Runs on Customer's Claude
+  </footer>
+
+  <script>
+    let planData = null;
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchPlanDetails();
+    });
+
+    async function fetchPlanDetails() {
+      // Extract plan ID/slug from URL path: /plan/:slug
+      const pathParts = window.location.pathname.split('/');
+      let planId = pathParts[pathParts.length - 1];
+      if (!planId || planId === 'plan' || planId === 'plan.html') {
+        planId = 'fintech-corp-onboarding';
+      }
+
+      try {
+        const res = await fetch(`/api/plans/${planId}`);
+        const result = await res.json();
+        if (result.success && result.plan) {
+          planData = result.plan;
+          renderPlan();
+        } else {
+          document.body.innerHTML = `<div class="text-center py-24 text-slate-400"><h3>Plan not found.</h3><p class="text-xs mt-2 text-slate-600">Check the URL or contact your implementation lead.</p></div>`;
+        }
+      } catch (err) {
+        console.error('Failed to load plan:', err);
+      }
+    }
+
+    function renderPlan() {
+      if (!planData) return;
+
+      document.title = `${planData.clientName} — Onboarding Portal`;
+      document.getElementById('navClientName').innerText = planData.clientName;
+      document.getElementById('badgeClientName').innerText = planData.clientName;
+      document.getElementById('heroPlanTitle').innerText = planData.planTitle;
+      document.getElementById('heroSummary').innerText = planData.summary || 'Welcome to your tailored implementation roadmap. Check off items as you complete them to accelerate your go-live.';
+      document.getElementById('heroTargetDate').innerText = planData.targetDate || 'Flexible';
+      if (planData.vendorLead) {
+        document.getElementById('footerVendorLead').innerText = planData.vendorLead;
+      }
+
+      // Calculations
+      let totalTasks = 0;
+      let completedTasks = 0;
+      planData.milestones.forEach(m => {
+        if (m.tasks) {
+          m.tasks.forEach(t => {
+            totalTasks++;
+            if (t.status === 'completed') completedTasks++;
+          });
+        }
+      });
+      const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+
+      document.getElementById('progressText').innerText = `${pct}%`;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('tasksCompletedCount').innerText = `${completedTasks} tasks done`;
+      document.getElementById('tasksTotalCount').innerText = `${totalTasks} total tasks`;
+
+      renderMilestonesList();
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.getElementById('filterAll').className = filter === 'all' 
+        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm' 
+        : 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
+      document.getElementById('filterClient').className = filter === 'client' 
+        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white shadow-sm' 
+        : 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
+      document.getElementById('filterVendor').className = filter === 'vendor' 
+        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm' 
+        : 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800';
+      renderMilestonesList();
+    }
+
+    function renderMilestonesList() {
+      const container = document.getElementById('milestonesList');
+      if (!planData.milestones || !planData.milestones.length) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">No milestones defined yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = planData.milestones.map((m, mIdx) => {
+        // Filter tasks
+        const visibleTasks = (m.tasks || []).filter(t => {
+          if (currentFilter === 'all') return true;
+          return t.owner === currentFilter;
+        });
+
+        if (visibleTasks.length === 0 && currentFilter !== 'all') {
+          return ''; // Hide phase if no tasks match filter
+        }
+
+        const mTotal = m.tasks ? m.tasks.length : 0;
+        const mDone = m.tasks ? m.tasks.filter(t => t.status === 'completed').length : 0;
+        const isPhaseComplete = mTotal > 0 && mDone === mTotal;
+
+        return `
+          <div class="bg-slate-900/80 border ${isPhaseComplete ? 'border-emerald-500/30' : 'border-slate-800'} rounded-2xl p-6 shadow-xl space-y-4 transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-2">
+              <div class="flex items-center space-x-3">
+                <div class="h-7 w-7 rounded-full ${isPhaseComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'} flex items-center justify-center font-bold text-xs">
+                  ${isPhaseComplete ? '✓' : (mIdx + 1)}
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-white tracking-tight">${m.title}</h3>
+                  <div class="text-xs text-slate-400">${mDone} of ${mTotal} completed ${m.dueDate ? `• Target: ${m.dueDate}` : ''}</div>
+                </div>
+              </div>
+              <div>
+                <span class="text-xs font-medium px-2.5 py-1 rounded-full ${isPhaseComplete ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">
+                  ${isPhaseComplete ? 'Completed' : 'In Progress'}
+                </span>
+              </div>
+            </div>
+
+            <!-- Task List -->
+            <div class="space-y-2.5">
+              ${visibleTasks.map(task => {
+                const isCompleted = task.status === 'completed';
+                const isClient = task.owner === 'client';
+
+                return `
+                  <div class="group flex items-start space-x-3 p-3.5 rounded-xl border ${isCompleted ? 'bg-slate-950/40 border-slate-800/50' : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'} transition-all">
+                    <div class="pt-0.5">
+                      <input 
+                        type="checkbox" 
+                        ${isCompleted ? 'checked' : ''} 
+                        onchange="toggleTaskStatus('${task.id}')"
+                        class="h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                      >
+                    </div>
+                    <div class="flex-1 space-y-1">
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <span class="text-sm font-semibold ${isCompleted ? 'line-through text-slate-500' : 'text-slate-100'}">
+                          ${task.title}
+                        </span>
+                        <span class="inline-flex self-start sm:self-auto text-[10px] font-semibold px-2 py-0.5 rounded ${isClient ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}">
+                          ${isClient ? 'Action Required: You (Client)' : 'Volopay Team'}
+                        </span>
+                      </div>
+                      ${task.notes ? `<p class="text-xs text-slate-400 leading-relaxed">${task.notes}</p>` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleTaskStatus(taskId) {
+      try {
+        const res = await fetch(`/api/plans/${planData.id}/tasks/${taskId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success && data.plan) {
+          planData = data.plan;
+          renderPlan();
+        }
+      } catch (err) {
+        alert('Failed to update task: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

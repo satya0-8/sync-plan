@@ -1,0 +1,103 @@
+{
+  "plans": [
+    {
+      "id": "plan_demo_fintech",
+      "slug": "fintech-corp-onboarding",
+      "clientName": "FinTech Corp",
+      "planTitle": "Enterprise ERP Integration & Card Rollout",
+      "targetDate": "2026-12-15",
+      "status": "active",
+      "clientContact": "Sarah Jenkins (Head of Finance)",
+      "vendorLead": "Alex Rivera (Founding Product Lead)",
+      "summary": "Onboarding blueprint to connect NetSuite, establish department spending limits, and issue 150 virtual cards.",
+      "createdAt": "2026-11-10T05:51:31.191Z",
+      "updatedAt": "2026-11-10T05:51:31.191Z",
+      "milestones": [
+        {
+          "id": "m_1",
+          "title": "Phase 1: Compliance & Account Verification",
+          "dueDate": "2026-11-18",
+          "tasks": [
+            {
+              "id": "t_1_1",
+              "title": "Submit KYB documents & authorized signatory IDs",
+              "owner": "client",
+              "status": "completed",
+              "notes": "Verified by compliance"
+            },
+            {
+              "id": "t_1_2",
+              "title": "Configure Okta SAML 2.0 Single Sign-On",
+              "owner": "client",
+              "status": "completed",
+              "notes": "SSO live"
+            },
+            {
+              "id": "t_1_3",
+              "title": "Provision Volopay production tenant & roles",
+              "owner": "vendor",
+              "status": "completed",
+              "notes": "Tenant provisioned"
+            }
+          ]
+        },
+        {
+          "id": "m_2",
+          "title": "Phase 2: Accounting & ERP Synchronization",
+          "dueDate": "2026-11-28",
+          "tasks": [
+            {
+              "id": "t_2_1",
+              "title": "Connect NetSuite Sandbox and grant OAuth token",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Awaiting IT credentials"
+            },
+            {
+              "id": "t_2_2",
+              "title": "Map General Ledger (GL) Codes & Tax rules",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Mapped 48 categories"
+            },
+            {
+              "id": "t_2_3",
+              "title": "Run 2-way sync test with 10 dummy transactions",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "m_3",
+          "title": "Phase 3: Card Controls & Employee Rollout",
+          "dueDate": "2026-12-15",
+          "tasks": [
+            {
+              "id": "t_3_1",
+              "title": "Define multi-level manager approval thresholds",
+              "owner": "client",
+              "status": "pending",
+              "notes": ""
+            },
+            {
+              "id": "t_3_2",
+              "title": "Conduct 45-min live employee training session",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Scheduled for Dec 10"
+            },
+            {
+              "id": "t_3_3",
+              "title": "Issue 150 physical & virtual cards for team leads",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/plan/:slug", "destination": "/plan.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/mcp", "destination": "/api/index.js" },
+    { "source": "/sse", "destination": "/api/index.js" }
+  ]
+}

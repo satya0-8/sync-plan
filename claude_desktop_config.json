@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "syncplan": {
+      "command": "node",
+      "args": ["/ABSOLUTE/PATH/TO/syncplan/mcp-server.js"],
+      "env": {
+        "SYNCPLAN_API_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
