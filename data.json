@@ -1,6 +1,133 @@
 {
   "plans": [
     {
+      "id": "plan_fb2f79fc",
+      "slug": "apex-logistics-801",
+      "clientName": "Apex Logistics",
+      "planTitle": "Corporate Card & Fuel Spend Onboarding",
+      "targetDate": "2026-12-20",
+      "status": "active",
+      "clientContact": "Marcus Vance (VP of Operations) - marcus@apexlogistics.com",
+      "vendorLead": "Alex Rivera (Implementation Lead, Volopay)",
+      "summary": "Automated spend management rollout for Apex Logistics' fleet of 85 commercial drivers, addressing ~12% monthly spend leakage from paper fuel receipts, lost reimbursement slips, and non-fuel purchases on personal cards. Includes MCC-locked fleet cards, a $250k revolving credit line, multi-tier approvals, and QuickBooks Online accounting sync.",
+      "createdAt": "2026-11-10T08:25:06.310Z",
+      "updatedAt": "2026-11-10T08:25:06.311Z",
+      "milestones": [
+        {
+          "id": "m_1",
+          "title": "Phase 1: Fleet Roster & Spend Policy Setup",
+          "dueDate": "2026-11-25",
+          "tasks": [
+            {
+              "id": "t_1_1",
+              "title": "Upload master roster of 85 drivers",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Include vehicle registration numbers and state license IDs for each driver."
+            },
+            {
+              "id": "t_1_2",
+              "title": "Configure MCC locks on fleet cards",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Strictly lock cards to MCC 5541 (Service Stations / Fuel) and disable non-fuel convenience retail."
+            },
+            {
+              "id": "t_1_3",
+              "title": "Approve and activate $250k revolving fleet credit line",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Volopay underwriting approval and activation required."
+            },
+            {
+              "id": "t_1_4",
+              "title": "Confirm multi-tier manager approval thresholds",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Rachel Adams (Head of Finance) to confirm: any expense over $350 requires automated dispatcher sign-off."
+            }
+          ]
+        },
+        {
+          "id": "m_2",
+          "title": "Phase 2: Card Logistics & ERP Accounting Sync",
+          "dueDate": "2026-12-08",
+          "tasks": [
+            {
+              "id": "t_2_1",
+              "title": "Bulk-dispatch 85 physical contactless fleet cards",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Ship via FedEx Priority with individual tracking numbers."
+            },
+            {
+              "id": "t_2_2",
+              "title": "Connect QuickBooks Online production tenant via OAuth 2.0",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Apex IT/Finance to complete the connection."
+            },
+            {
+              "id": "t_2_3",
+              "title": "Map Chart of Accounts to default fuel and toll accounts",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Volopay implementation engineer to map fuel account #6240 and toll account #6250."
+            },
+            {
+              "id": "t_2_4",
+              "title": "Run 2-way dummy sync test with 10 simulated fuel transactions",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Verify clean GL journal entry posting in QuickBooks Online; Apex Finance to review results."
+            }
+          ]
+        },
+        {
+          "id": "m_3",
+          "title": "Phase 3: Driver Rollout, Telematics & Go-Live",
+          "dueDate": "2026-12-20",
+          "tasks": [
+            {
+              "id": "t_3_1",
+              "title": "Conduct 30-minute live webinar for dispatchers and fleet managers",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Training on instant card freeze/unfreeze controls."
+            },
+            {
+              "id": "t_3_2",
+              "title": "Download mobile app and verify mobile numbers for card activation",
+              "owner": "client",
+              "status": "pending",
+              "notes": "All Apex drivers to complete."
+            },
+            {
+              "id": "t_3_3",
+              "title": "Configure mandatory odometer and vehicle ID prompts at POS",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Prompts triggered whenever a fuel pump card is swiped."
+            },
+            {
+              "id": "t_3_4",
+              "title": "Provide final executive sign-off",
+              "owner": "client",
+              "status": "pending",
+              "notes": "Marcus Vance (VP of Operations) to approve."
+            },
+            {
+              "id": "t_3_5",
+              "title": "Cut over to live fleet spending",
+              "owner": "vendor",
+              "status": "pending",
+              "notes": "Full cutover after executive sign-off; target go-live December 20, 2026."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "plan_5e3b8db2",
       "slug": "acme-health-872",
       "clientName": "ACME Health",

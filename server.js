@@ -117,13 +117,19 @@ function handleRequest(req, res) {
 
   // Resolve true route even if rewritten by Vercel serverless (/api/index.js)
   const matchedPath = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-rewrite-url'] || '';
-  const rawPath = matchedPath || req.url || '/';
-  const parsedUrl = new URL(rawPath, `http://${req.headers.host || 'localhost'}`);
-  let pathname = parsedUrl.pathname;
+  const parsedUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+  let pathname = parsedUrl.searchParams.get('path') || (req.query && req.query.path) || matchedPath || parsedUrl.pathname;
 
-  // If Vercel passed /api/index.js as pathname but we have a matched route
-  if ((pathname === '/api/index.js' || pathname === '/api' || pathname === '/api/') && matchedPath) {
-    pathname = matchedPath;
+  // If Vercel passed /api/index.js or /api, resolve from path query, matchedPath, or infer default
+  if (pathname === '/api/index.js' || pathname === '/api' || pathname === '/api/') {
+    if (parsedUrl.searchParams.get('path')) {
+      pathname = parsedUrl.searchParams.get('path');
+    } else if (matchedPath) {
+      pathname = matchedPath;
+    } else {
+      // Fallback: If POST with JSON body, treat as /api/plans; if GET, list plans
+      pathname = '/api/plans';
+    }
   }
   // Strip trailing slash except for root
   if (pathname.length > 1 && pathname.endsWith('/')) {
