@@ -11,7 +11,7 @@
       "vendorLead": "Alex Rivera (Founder's Office Lead)",
       "summary": "Simulated Claude cognitive synthesis for FinTech Corp.",
       "createdAt": "2026-11-10T08:05:58.123Z",
-      "updatedAt": "2026-11-10T08:05:58.123Z",
+      "updatedAt": "2026-11-10T08:07:13.957Z",
       "milestones": [
         {
           "id": "m_1",
@@ -22,7 +22,7 @@
               "id": "t_1_1",
               "title": "Submit KYB documents & authorized signatory IDs",
               "owner": "client",
-              "status": "pending",
+              "status": "completed",
               "notes": "Verified by compliance"
             },
             {
